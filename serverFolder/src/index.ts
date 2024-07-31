@@ -1,4 +1,5 @@
 import express, {Request, Response} from 'express';
+import { RequestWithBody, RequestWithParams, RequestWithParamsAndBody, RequestWithQuery } from './types';
 export const app = express();
 const port = 3000;
 const jsonBodyMiddleware = express.json();
@@ -27,7 +28,7 @@ const db:{courses: CourseType[]} = {
 app.get('/', (req, res) => {
   res.send('Work');
 });
-app.get('/courses', (req: Request<{},{},{},{title: string}>,
+app.get('/courses', (req:   RequestWithQuery<{title: string}>,
                      res: Response<CourseType[]>) => {
   let foundCoursesQuery = db.courses;
   if (req.query.title) {
@@ -36,7 +37,7 @@ app.get('/courses', (req: Request<{},{},{},{title: string}>,
 
   res.json(foundCoursesQuery);
 });
-app.get('/courses/:id',  (req: Request<{id: string}>,
+app.get('/courses/:id',  (req: RequestWithParams<{id: string}>,
   res) => {
   const foundCourse = db.courses.find(c => c.id === +req.params.id);
 
@@ -46,7 +47,7 @@ app.get('/courses/:id',  (req: Request<{id: string}>,
   }
   res.json(foundCourse);
 });
-app.post('/courses', (req:Request<{}, {}, {title: string}>, res:Response<CourseType>) => {
+app.post('/courses', (req:RequestWithBody<{title: string}>, res:Response<CourseType>) => {
   if(!req.body.title){
     res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
     return;
@@ -58,11 +59,12 @@ app.post('/courses', (req:Request<{}, {}, {title: string}>, res:Response<CourseT
   db.courses.push(newCourse);
   res.sendStatus(HTTP_STATUSES.CREATED_201).json(newCourse);
 });
-app.delete('/courses/:id', (req: Request<{id:string}>, res) => {
+app.delete('/courses/:id', (req: RequestWithParams<{id:string}>, res) => {
   db.courses = db.courses.filter(c => c.id !== +req.params.id);
   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
 });
-app.put('/courses/:id', (req:Request<{id:string}, {}, {title: string}>, res) => {
+app.put('/courses/:id', (req:RequestWithParamsAndBody<{id:string}, {title: string}>,
+                         res:Response) => {
   if (!req.body.title) {
     res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
     return;
