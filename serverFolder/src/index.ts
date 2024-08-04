@@ -1,5 +1,9 @@
 import express, {Request, Response} from 'express';
 import { RequestWithBody, RequestWithParams, RequestWithParamsAndBody, RequestWithQuery } from './types';
+import {CourseCreateInputModel} from './models/CourseCreateModel';
+import {CourseUpdateInputModel} from './models/CourseUpdateModel';
+import {GetCoursesQueryModel} from './models/GetCourseQueryModel';
+import {CourseViewModel} from './models/CourseViewModel';
 export const app = express();
 const port = 3000;
 const jsonBodyMiddleware = express.json();
@@ -15,21 +19,22 @@ app.use(jsonBodyMiddleware);
 type CourseType = {
   id: number
   title: string
+  studentsCount: number
 }
 const db:{courses: CourseType[]} = {
   courses: [
-    { id: 1, title: 'front-end' },
-    { id: 2, title: 'back-end' },
-    { id: 3, title: 'automation qa' },
-    { id: 4, title: 'devops' },
-    { id: 5, title: 'devops' },
+    { id: 1, title: 'front-end', studentsCount: 10 },
+    { id: 2, title: 'back-end',studentsCount: 10 },
+    { id: 3, title: 'automation qa',studentsCount: 10 },
+    { id: 4, title: 'devops',studentsCount: 10 },
+    { id: 5, title: 'devops',studentsCount: 10 },
   ],
 };
 app.get('/', (req, res) => {
   res.send('Work');
 });
-app.get('/courses', (req:   RequestWithQuery<{title: string}>,
-                     res: Response<CourseType[]>) => {
+app.get('/courses', (req:   RequestWithQuery<GetCoursesQueryModel>,
+                     res: Response<CourseViewModel[]>) => {
   let foundCoursesQuery = db.courses;
   if (req.query.title) {
     foundCoursesQuery = foundCoursesQuery.filter(c => c.title.includes(req.query.title as string));
@@ -38,7 +43,7 @@ app.get('/courses', (req:   RequestWithQuery<{title: string}>,
   res.json(foundCoursesQuery);
 });
 app.get('/courses/:id',  (req: RequestWithParams<{id: string}>,
-  res) => {
+  res: Response<CourseViewModel>) => {
   const foundCourse = db.courses.find(c => c.id === +req.params.id);
 
   if (!foundCourse) {
@@ -47,14 +52,15 @@ app.get('/courses/:id',  (req: RequestWithParams<{id: string}>,
   }
   res.json(foundCourse);
 });
-app.post('/courses', (req:RequestWithBody<{title: string}>, res:Response<CourseType>) => {
+app.post('/courses', (req:RequestWithBody<CourseCreateInputModel>, res:Response<CourseViewModel>) => {
   if(!req.body.title){
     res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
     return;
   }
-  const newCourse = {
+  const newCourse: CourseType = {
     id: +(new Date()),
     title: req.body.title,
+    studentsCount: 10
   };
   db.courses.push(newCourse);
   res.sendStatus(HTTP_STATUSES.CREATED_201).json(newCourse);

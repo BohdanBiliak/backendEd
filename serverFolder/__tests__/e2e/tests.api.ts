@@ -38,6 +38,7 @@ describe('/serverFolder',  ()=>{
         expect(newCourse).toEqual({
             id: expect.any(Number),
             title: 'Incubator'
+          
         }) 
     })
 
