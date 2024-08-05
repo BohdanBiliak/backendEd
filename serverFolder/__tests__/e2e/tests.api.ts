@@ -1,5 +1,6 @@
 import  request  from "supertest";
-import {app, HTTP_STATUSES} from '../../src/app';
+import {app} from '../../src/app';
+import {HTTP_STATUSES} from '../../src/routes/courses'
 import { title } from "process";
 describe('/serverFolder',  ()=>{
     beforeAll(async ()=>{
